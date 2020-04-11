@@ -1,48 +1,32 @@
-const mysql=require("mysql")
-module.exports={
-    /**
-     * 数据库配置
-     */
-    config: {
-        host:"localhost",
-        user:"root",
-        password:"123456",
-        database:"myblog"
-    },
-    conn: null,
-    /**
-     * 创建连接池并连接
-     * @param callback
-     */
-    openConn: function (callback) {
-        var me = this;
-        me.conn = mysql.createConnection(me.config);
-    },
-    /**
-     * 释放连接池
-     * @param conn
-     */
-    closeConn: function () {
-        var me = this;
-        me.conn.end(function (err) {
-            console.log(err);
-        });
-    },
-    /**
-     * 执行连接
-     * @param config
-     */
-    exec: function (config) {
-        const me = this;
-        me.openConn();
-        me.conn.query(config.sql, config.params, function (err, res) {
+const mysql = require('mysql');
+let pool = mysql.createPool({
+    connectionLimit: 50,
+    host: 'localhost',
+    user: 'root',
+    password: '123456',
+    database: 'transportsys',
+    multipleStatements: true //是否允许执行多条sql语句
+});
+//将结果已对象数组返回
+let row = (sql, params) => {
+    return new Promise(function (resolve, reject) {
+        pool.getConnection(function (err, connection) {
             if (err) {
-                console.log(err);
-            } else if (config.callback) {
-                config.callback(res);
+                reject(err);
+                return;
             }
-            // 关闭数据库连接
-            me.closeConn();
+            connection.query(sql, params, function (error, res) {
+                connection.release();
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(res);
+            });
         });
-    }
+    });
+};
+//模块导出
+module.exports = {
+    row: row,
 }
