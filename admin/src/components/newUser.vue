@@ -29,7 +29,7 @@
         },
         methods:{
             onSubmit(){
-                let params={"phone":this.phone,"name":this.name,"pwd":this.pwd}
+                let params={"phone":this.phone,"name":this.name,"pwd":this.pwd};
                 this.$http.post("/newUser",params).then(res=>{
                     console.log(res);
                 })

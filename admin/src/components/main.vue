@@ -1,19 +1,23 @@
 <template>
     <el-container style="height: 100vh">
         <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
-            <el-menu router :default-openeds="['1', '2']">
+            <el-menu router :default-openeds="['1','2']">
                 <el-submenu index="1">
                     <template slot="title"><i class="el-icon-message"></i>数据查看</template>
                     <el-menu-item-group>
+                        <el-menu-item index="/dayData">查看日报表</el-menu-item>
                         <el-menu-item index="/monthData">查看月报表</el-menu-item>
                         <el-menu-item index="/yearData">查看年报表</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
                 <el-submenu index="2">
-                    <template slot="title"><i class="el-icon-menu"></i>用户操作</template>
+                    <template slot="title"><i class="el-icon-menu"></i>信息维护</template>
                     <el-menu-item-group>
-                        <el-menu-item index="/newUser">新增用户</el-menu-item>
-                        <el-menu-item index="/userList">查询用户</el-menu-item>
+                        <!--<el-menu-item index="/newUser">新增用户</el-menu-item>-->
+                        <el-menu-item index="/userList">人员列表</el-menu-item>
+                        <el-menu-item index="/startPoint">地点维护</el-menu-item>
+                        <el-menu-item index="/vehicle">车辆维护</el-menu-item>
+                        <el-menu-item index="/cargo">货物维护</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
             </el-menu>

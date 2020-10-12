@@ -10,11 +10,9 @@ app.all('*', function (req, res, next) {
     next();
 });
 app.use("/admin", express.static(__dirname + "/admin"))
-app.use("/app", express.static(__dirname + "/app"))
+// app.use("/app", express.static(__dirname + "/app"))
 const adminRouter = require("./router/admin")(app)
-const appRouter = require("./router/app")(app)
+// const appRouter = require("./router/app")(app)
 app.listen(3000, function () {
     console.log("正在开启3000端口");
-    const utility = require('utility');
-    let res = utility.md5("asdsdfsdf")
 })

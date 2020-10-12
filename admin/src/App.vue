@@ -5,8 +5,13 @@
 </template>
 
 <style>
-  html,body{
+  html,body,#app{
     padding: 0;
     margin: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .el-header{
+    background-color: #f5f5f5!important;
   }
 </style>
