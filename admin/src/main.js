@@ -4,7 +4,9 @@ import './plugins/element.js'
 import router from './router'
 import http from "./utils/utils"
 import md5 from 'js-md5';
+import echarts from 'echarts'
 
+Vue.prototype.$echarts = echarts
 Vue.config.productionTip = false;
 Vue.prototype.$http = http;
 Vue.prototype.$md5 = md5;

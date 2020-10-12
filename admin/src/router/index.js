@@ -2,8 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import main from '../components/main.vue'
 import dayData from '../components/dayData.vue'
-import monthData from '../components/monthData.vue'
-import yearData from '../components/yearData.vue'
+import chartData from '../components/chartData.vue'
 import newUser from '../components/newUser.vue'
 import userList from '../components/userList.vue'
 import login from '../components/login.vue'
@@ -25,14 +24,9 @@ const routes = [
                 component: dayData
             },
             {
-                path: '/monthData',
-                name: 'monthData',
-                component: monthData
-            },
-            {
-                path: '/yearData',
-                name: 'yearData',
-                component: yearData
+                path: '/chartData',
+                name: 'chartData',
+                component: chartData
             },
             {
                 path: '/newUser',

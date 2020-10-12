@@ -5,9 +5,8 @@
                 <el-submenu index="1">
                     <template slot="title"><i class="el-icon-message"></i>数据查看</template>
                     <el-menu-item-group>
-                        <el-menu-item index="/dayData">查看日报表</el-menu-item>
-                        <el-menu-item index="/monthData">查看月报表</el-menu-item>
-                        <el-menu-item index="/yearData">查看年报表</el-menu-item>
+                        <el-menu-item index="/dayData">查看数据报表</el-menu-item>
+                        <el-menu-item index="/chartData">查看图形报表</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
                 <el-submenu index="2">
