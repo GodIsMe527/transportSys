@@ -5,14 +5,13 @@
                 <el-submenu index="1">
                     <template slot="title"><i class="el-icon-message"></i>数据查看</template>
                     <el-menu-item-group>
-                        <el-menu-item index="/dayData">查看数据报表</el-menu-item>
-                        <el-menu-item index="/chartData">查看图形报表</el-menu-item>
+                        <el-menu-item index="/dataReport">数据报表统计</el-menu-item>
+                        <el-menu-item index="/chartData">收益图形报表</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
                 <el-submenu index="2">
                     <template slot="title"><i class="el-icon-menu"></i>信息维护</template>
                     <el-menu-item-group>
-                        <!--<el-menu-item index="/newUser">新增用户</el-menu-item>-->
                         <el-menu-item index="/userList">人员列表</el-menu-item>
                         <el-menu-item index="/startPoint">地点维护</el-menu-item>
                         <el-menu-item index="/vehicle">车辆维护</el-menu-item>
@@ -33,7 +32,6 @@
                 </el-dropdown>
                 <span>王小虎</span>
             </el-header>
-
             <el-main>
                 <router-view></router-view>
             </el-main>
@@ -43,7 +41,7 @@
 
 <script>
     export default {
-        name: "main",
+        name: "mainPart",
         data() {
             const item = {
                 date: '2016-05-02',

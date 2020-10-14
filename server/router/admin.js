@@ -13,7 +13,6 @@ module.exports = (app) => {
         let r = await db.row(sql, [name]);
         if (r && r.length > 0) {
             r = r[0];
-            console.log(r);
             if (r.pwd === pwd) {
                 let randomStr = util.randomString(24) + "WLT" + new Date().getTime()
                 let token = md5(randomStr);           //登陆后生成token   随机字符串+固定字符串+时间戳
@@ -28,8 +27,6 @@ module.exports = (app) => {
                     data.message = "登录失败";
                 }
                 console.log(r);
-                // data.code = 0;
-                // data.message = "登录成功";
             } else {
                 data.code = -99;
                 data.message = "用户名或密码错误";
@@ -58,13 +55,13 @@ module.exports = (app) => {
      * 修改用户
      */
     router.post("/editUser", async (req, res) => {
-        let sql = "",data = {},r="";
-        if(req.body["pwd"]){
+        let sql = "", data = {}, r = "";
+        if (req.body["pwd"]) {
             sql = "update user set userName=? , phone=? ,pwd=?  where id=?";
             r = await db.row(sql, [req.body["name"], req.body["phone"], req.body["pwd"], req.body["id"]]);
-        }else{
+        } else {
             sql = "update user set userName=? , phone=? where id=?";
-            r = await db.row(sql, [req.body["name"], req.body["phone"],  req.body["id"]]);
+            r = await db.row(sql, [req.body["name"], req.body["phone"], req.body["id"]]);
         }
         if (r && r.affectedRows) {
             data.code = 0;
@@ -118,9 +115,9 @@ module.exports = (app) => {
         let status = req.query.status;
         let currentPage = req.query.currentPage;
         let pageSize = req.query.pageSize;
-        let sql, data, result,num;
+        let sql, data, result, num;
         data = {};
-        if (status == 0||status == 1) {
+        if (status == 0 || status == 1) {
             sql = "select * from user where type=? limit ?,?";
             result = await db.row(sql, [parseInt(status), (currentPage - 1) * pageSize, parseInt(pageSize)]);
             sql = "select count(*) from user where type=?";
@@ -145,7 +142,6 @@ module.exports = (app) => {
         let currentPage = req.query.currentPage;
         let pageSize = req.query.pageSize;
         if (status == 0 || status == 1) {
-            console.log("11111=" + status);
             sql = "select * from address where status=? limit ?,?";
             result = await db.row(sql, [parseInt(status), (currentPage - 1) * pageSize, parseInt(pageSize)]);
             sql = "select count(*) from address where status=?";
@@ -170,7 +166,6 @@ module.exports = (app) => {
         let currentPage = req.query.currentPage;
         let pageSize = req.query.pageSize;
         if (status == 0 || status == 1) {
-            console.log("11111=" + status);
             sql = "select * from vehicle where status=? limit ?,?";
             result = await db.row(sql, [parseInt(status), (currentPage - 1) * pageSize, parseInt(pageSize)]);
             sql = "select count(*) from vehicle where status=?";
@@ -203,6 +198,30 @@ module.exports = (app) => {
             sql = "select * from cargo limit ?,?";
             result = await db.row(sql, [(currentPage - 1) * pageSize, parseInt(pageSize)]);
             sql = "select count(*) from cargo";
+            num = await db.row(sql, []);
+        }
+        data.data = result;
+        data.total = num[0]["count(*)"];
+        data.code = 0;
+        res.send(data)
+    });
+    /**
+     * 获取记录列表
+     */
+    router.get("/getRecordList", async (req, res) => {
+        let status = req.query.status;
+        let data = {}, sql, result, num;
+        let currentPage = parseInt(req.query.currentPage);
+        let pageSize = parseInt(req.query.pageSize);
+        if (status == 0 || status == 1) {
+            sql = "select * from record where status=? limit ?,?";
+            result = await db.row(sql, [parseInt(status), (currentPage - 1) * pageSize, currentPage * pageSize]);
+            sql = "select count(*) from record where status=?";
+            num = await db.row(sql, [parseInt(status)]);
+        } else {
+            sql = "select * from record limit ?,?";
+            result = await db.row(sql, [(currentPage - 1) * pageSize, currentPage * pageSize]);
+            sql = "select count(*) from record";
             num = await db.row(sql, []);
         }
         data.data = result;
@@ -276,6 +295,20 @@ module.exports = (app) => {
         }
     });
     /**
+     * 修改记录
+     */
+    router.post("/editRecord", async (req, res) => {
+        let sql = "update record set cargo=? , weight=? , price=?  , startAddress=? , endAddress=? , vehicle=? , driver=? , downFee=? , roadFee=?  where id=?";
+        let data = {};
+        let r = await db.row(sql, [req.body["cargo"],req.body["num"],req.body["price"],
+            req.body["startAddress"],req.body["endAddress"],req.body["vehicle"],req.body["driver"],req.body["downFee"],req.body["roadFee"], req.body["id"]]);
+        if (r && r.affectedRows) {
+            data.code = 0;
+            data.message = "修改成功";
+            res.send(data);
+        }
+    });
+    /**
      * 修改地点状态
      */
     router.post("/deletePoint", async (req, res) => {
@@ -318,19 +351,19 @@ module.exports = (app) => {
      * 新增记录
      */
     router.post("/newRecord", async (req, res) => {
-        let downFee=req.body["downFee"],roadFee=req.body["roadFee"],data = {},sql="",r=[];
-        if(downFee&&roadFee){
-            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,downFee,roadFee) values(?,?,?,?,?,?,now(),?,?)";
-            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"],req.body["driver"],req.body["downFee"],req.body["roadFee"]]);
-        }else if(downFee){
-            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,downFee) values(?,?,?,?,?,?,now(),?)";
-            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"],req.body["driver"],req.body["downFee"]]);
-        }else if(roadFee){
-            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,roadFee) values(?,?,?,?,?,?,now(),?)";
-            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"],req.body["driver"],req.body["roadFee"]]);
-        }else{
-            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime) values(?,?,?,?,?,?,now())";
-            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"],req.body["driver"]]);
+        let downFee = req.body["downFee"], roadFee = req.body["roadFee"], data = {}, sql = "", r = [];
+        if (downFee && roadFee) {
+            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,downFee,roadFee,vehicle) values(?,?,?,?,?,?,now(),?,?,?)";
+            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"], req.body["driver"], req.body["downFee"], req.body["roadFee"],req.body["vehicle"]]);
+        } else if (downFee) {
+            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,downFee,vehicle) values(?,?,?,?,?,?,now(),?,?)";
+            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"], req.body["driver"], req.body["downFee"],req.body["vehicle"]]);
+        } else if (roadFee) {
+            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,roadFee,vehicle) values(?,?,?,?,?,?,now(),?,?)";
+            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"], req.body["driver"], req.body["roadFee"],req.body["vehicle"]]);
+        } else {
+            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,vehicle) values(?,?,?,?,?,?,now(),?)";
+            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"], req.body["driver"],req.body["vehicle"]]);
         }
         if (r && r.affectedRows) {
             data.code = 0;

@@ -130,6 +130,15 @@ const api= {
         };
         return requestAll.request(param);
     },
+    //修改记录
+    editRecord(data){
+        let param={
+            url:"/editRecord",
+            method:"post",
+            data:data
+        };
+        return requestAll.request(param);
+    },
     //修改车辆
     editVehicle(data){
         let param={
@@ -166,6 +175,15 @@ const api= {
         };
         return requestAll.request(param);
     },
+    //获取所有运输记录列表
+    getRecordList(data){
+        let param={
+            url:"/getRecordList",
+            method:"get",
+            data:data
+        };
+        return requestAll.requestGet(param);
+    }
 
 };
 

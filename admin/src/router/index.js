@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import main from '../components/main.vue'
-import dayData from '../components/dayData.vue'
+import main from '../components/mainPart.vue'
+import dataReport from '../components/dataReport.vue'
 import chartData from '../components/chartData.vue'
 import newUser from '../components/newUser.vue'
 import userList from '../components/userList.vue'
@@ -19,9 +19,9 @@ const routes = [
         component: main,
         children:[
             {
-                path: '/dayData',
-                name: 'dayData',
-                component: dayData
+                path: '/dataReport',
+                name: 'dataReport',
+                component: dataReport
             },
             {
                 path: '/chartData',

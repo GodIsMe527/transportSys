@@ -1,89 +1,112 @@
 <template>
     <div>
-        <div ref="chartPart" style="width: 80%;">
-
-        </div>
+        <p @click="change">点我开始变</p>
+        <p @click="getValue">点我获取值</p>
+        <filter-head ref="filterHead"></filter-head>
+        <div ref="chartPart" style="width: 100%;height: 500px"></div>
     </div>
 </template>
 
 <script>
-    // 基于准备好的dom，初始化echarts实例
+    import filterHead from "./common/filterHead.vue"
 
     export default {
         name: "chartData",
-        mounted(){
-            console.log(this.$refs.chartPart);
-            var myChart = this.$echarts.init(this.$refs.chartPart);
-            console.log(myChart);
-            var option = {
-                title: {
-                    text: '折线图堆叠'
-                },
-                tooltip: {
-                    trigger: 'axis'
-                },
-                legend: {
-                    data: ['邮件营销', '联盟广告', '视频广告', '直接访问', '搜索引擎']
-                },
-                grid: {
-                    left: '3%',
-                    right: '4%',
-                    bottom: '3%',
-                    containLabel: true
-                },
-                toolbox: {
-                    feature: {
-                        saveAsImage: {}
-                    }
-                },
+        components: {
+            filterHead
+        },
+        data() {
+            return {
+                myChart: {},
+                option: {},
+                start: "",
+                end: "",     //选择的起始日期
+                drivers: [{
+                    value: 'aaa',
+                    label: '老李'
+                }, {
+                    value: 'bbb',
+                    label: '老王'
+                }],
+                points: [{
+                    value: 'ccc',
+                    label: '北京'
+                }, {
+                    value: 'ddd',
+                    label: '南京'
+                }],
+                driverD: "",
+                startD: "",
+                endD: "",
+            }
+        },
+        methods: {
+            change() {
+                this.option = {
+                    xAxis: {
+                        type: 'category',
+                        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        data: [820, 932, 901, 934, 1290, 1330, 1320],
+                        type: 'line',
+                        smooth: true
+                    }]
+                };
+                this.myChart.setOption(this.option, true);
+            },
+            getValue() {
+                console.log(this.$refs.filterHead.getStart());
+            },
+        },
+        mounted() {
+            this.myChart = this.$echarts.init(this.$refs.chartPart);
+            this.option = {
                 xAxis: {
                     type: 'category',
-                    boundaryGap: false,
-                    data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+                    data: ['1日', '2日', '3日', '4日', '5日', '6日', '7日', '8日', '9日', '10日', '11日', '12日', '13日', '14日', '15日', '16日', '17日', '18日',
+                        '19日', '20日', '21日', '22日', '23日', '24日', '25日', '26日', '27日', '28日', '29日', '30日']
                 },
                 yAxis: {
                     type: 'value'
                 },
-                series: [
-                    {
-                        name: '邮件营销',
-                        type: 'line',
-                        stack: '总量',
-                        data: [120, 132, 101, 134, 90, 230, 210]
+
+                series: [{
+                    data: [120, 200, 150, 80, 70, 110, 130, 150, 263, 270, 120, 200, 150, 80, 70, 110, 130, 150, 263, 270, 120, 200, 150, 80, 70, 110, 130, 150, 263, 270],
+                    type: 'bar',
+                    showBackground: true,
+                    backgroundStyle: {
+                        // color: '#77b9f5'
+                        color: '#e7e7e7'
                     },
-                    {
-                        name: '联盟广告',
-                        type: 'line',
-                        stack: '总量',
-                        data: [220, 182, 191, 234, 290, 330, 310]
+                    itemStyle: {
+                        normal: {
+                            color: '#77b9f5',
+                            label: {
+                                show: true, //开启显示
+                                position: 'top', //在上方显示
+                                textStyle: { //数值样式
+                                    color: '#c23531',
+                                    fontSize: 10
+                                }
+                            }
+                        }
                     },
-                    {
-                        name: '视频广告',
-                        type: 'line',
-                        stack: '总量',
-                        data: [150, 232, 201, 154, 190, 330, 410]
-                    },
-                    {
-                        name: '直接访问',
-                        type: 'line',
-                        stack: '总量',
-                        data: [320, 332, 301, 334, 390, 330, 320]
-                    },
-                    {
-                        name: '搜索引擎',
-                        type: 'line',
-                        stack: '总量',
-                        data: [820, 932, 901, 934, 1290, 1330, 1320]
-                    }
-                ]
+                }]
             };
-            myChart.setOption(option);
+            this.myChart.setOption(this.option);
+            window.addEventListener('resize', () => {
+                this.myChart.resize();
+            });
         }
     }
 </script>
 
 <style scoped lang="less">
-    #data{
+    #data {
         width: 100%;
         height: 100%;
     }
