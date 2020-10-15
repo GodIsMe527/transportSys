@@ -4,7 +4,7 @@
             <div class="block">
                 <span class="title">开始日期: </span>
                 <el-date-picker
-                        v-model="start"
+                        v-model="startD"
                         type="date"
                         placeholder="开始日期">
                 </el-date-picker>
@@ -12,46 +12,54 @@
             <div class="block">
                 <span class="title">结束日期: </span>
                 <el-date-picker
-                        v-model="end"
+                        v-model="endD"
                         type="date"
                         placeholder="结束日期">
                 </el-date-picker>
             </div>
             <div class="block">
-                <el-button type="primary">提交</el-button>
+                <el-button type="primary" @click="commit">提交</el-button>
             </div>
         </div>
         <div class="firstCondition secondCondition" v-if="showSecondCondition">
             <el-select v-model="driverD" filterable placeholder="选择司机" class="block">
                 <el-option
                         v-for="item in drivers"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
+                        :key="item.id"
+                        :label="item.userName"
+                        :value="item.id">
                 </el-option>
             </el-select>
             <el-select v-model="cargoD" filterable placeholder="选择货物" class="block">
                 <el-option
                         v-for="item in cargoes"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
                 </el-option>
             </el-select>
-            <el-select v-model="startD" filterable placeholder="选择起点" class="block">
+            <el-select v-model="vehicleD" filterable placeholder="选择车辆" class="block">
                 <el-option
-                        v-for="item in points"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
+                        v-for="item in vehicles"
+                        :key="item.id"
+                        :label="item.no"
+                        :value="item.id">
                 </el-option>
             </el-select>
-            <el-select v-model="endD" filterable placeholder="选择终点" class="block">
+            <el-select v-model="start" filterable placeholder="选择起点" class="block">
                 <el-option
                         v-for="item in points"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
+                </el-option>
+            </el-select>
+            <el-select v-model="end" filterable placeholder="选择终点" class="block">
+                <el-option
+                        v-for="item in points"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id">
                 </el-option>
             </el-select>
         </div>
@@ -59,12 +67,9 @@
 </template>
 
 <script>
+    import api from '../../utils/api'
     export default {
         name: "filterHead",
-        mounted() {
-            console.log("showDate" + this.showDate);
-            console.log("showSecondCondition" + this.showSecondCondition);
-        },
         props: {
             showDate: {
                 type: Boolean,
@@ -77,33 +82,17 @@
         },
         data() {
             return {
-                start: "",
-                end: "",     //选择的起始日期
-                drivers: [{
-                    value: 'aaa',
-                    label: '老李'
-                }, {
-                    value: 'bbb',
-                    label: '老王'
-                }],
-                points: [{
-                    value: 'ccc',
-                    label: '北京'
-                }, {
-                    value: 'ddd',
-                    label: '南京'
-                }],
-                cargoes: [{
-                    value: 'bing',
-                    label: '冰'
-                }, {
-                    value: 'huo',
-                    label: '火'
-                }],
+                drivers: [],
+                points: [],
+                cargoes: [],
+                vehicles:[],
+                start: "",   //起始地点
+                end: "",     //结束地点
                 driverD: "",
                 startD: "",
-                endD: "",
-                cargoD:"",
+                endD: "",    //起始日期
+                cargoD:"",   //货物
+                vehicleD:"",   //车辆
             }
         },
         methods: {
@@ -122,6 +111,95 @@
             getEndD() {
                 return this.endD;
             },
+            getVehicleD() {
+                return this.vehicleD;
+            },
+            getCargoD() {
+                return this.cargoD;
+            },
+            //提交
+            commit(){
+                console.log("提交");
+                this.$emit("queryCommit");
+            },
+            //获取所有货物列表
+            getCargoList() {
+                let param = {
+                    currentPage:1,          //当前页数
+                    pageSize: 9999,       //页容量
+                    status: 1
+                };
+                return new Promise((resolve, reject) => {
+                    api.getCargoList(param).then(res => {
+                        if (res.data.code == 0) {
+                            this.cargoes = res.data.data;
+                            resolve()
+                        } else {
+                            reject();
+                        }
+                    });
+                })
+            },
+            //查询所有地点列表
+            getAddressList() {
+                let param = {
+                    currentPage: 1,          //当前页数
+                    pageSize: 9999,       //页容量
+                    status: 1
+                };
+                return new Promise((resolve, reject) => {
+                    api.getStartPointList(param).then(res => {
+                        if (res.data.code == 0) {
+                            this.points = res.data.data;
+                            resolve()
+                        } else {
+                            reject();
+                        }
+                    });
+                })
+            },
+            //查询车辆列表
+            getVehicleList() {
+                let param = {
+                    currentPage: 1,          //当前页数
+                    pageSize: 9999,       //页容量
+                    status: 1
+                };
+                return new Promise((resolve, reject) => {
+                    api.getVehicleList(param).then(res => {
+                        if (res.data.code == 0) {
+                            this.vehicles = res.data.data;
+                            resolve()
+                        } else {
+                            reject();
+                        }
+                    });
+                })
+            },
+            //查询所有司机列表
+            getDriver() {
+                let param = {
+                    currentPage: 1,          //当前页数
+                    pageSize: 99999,       //页容量
+                    type: 1
+                };
+                return new Promise((resolve, reject) => {
+                    api.getUserList(param).then(res => {
+                        if (res.data.code == 0) {
+                            this.drivers = res.data.data;
+                            resolve();
+                        } else {
+                            reject();
+                        }
+                    })
+                });
+            },
+        },
+        mounted(){
+            this.getCargoList();
+            this.getAddressList();
+            this.getVehicleList();
+            this.getDriver();
         }
     }
 </script>

@@ -213,6 +213,7 @@ module.exports = (app) => {
         let data = {}, sql, result, num;
         let currentPage = parseInt(req.query.currentPage);
         let pageSize = parseInt(req.query.pageSize);
+        let startTime=req.query.pageSize;
         if (status == 0 || status == 1) {
             sql = "select * from record where status=? limit ?,?";
             result = await db.row(sql, [parseInt(status), (currentPage - 1) * pageSize, currentPage * pageSize]);
@@ -339,6 +340,19 @@ module.exports = (app) => {
      */
     router.post("/deleteCargo", async (req, res) => {
         let sql = "update cargo set status=? where id=?";
+        let data = {};
+        let r = await db.row(sql, [req.body["status"], req.body["id"]]);
+        if (r && r.affectedRows) {
+            data.code = 0;
+            data.message = "修改成功";
+            res.send(data);
+        }
+    });
+    /**
+     * 修改记录状态
+     */
+    router.post("/delRecord", async (req, res) => {
+        let sql = "update record set status=? where id=?";
         let data = {};
         let r = await db.row(sql, [req.body["status"], req.body["id"]]);
         if (r && r.affectedRows) {

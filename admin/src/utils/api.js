@@ -94,6 +94,15 @@ const api= {
         };
         return requestAll.request(param);
     },
+    //修改记录状态
+    delRecord(data){
+        let param={
+            url:"/delRecord",
+            method:"post",
+            data:data
+        };
+        return requestAll.request(param);
+    },
     //添加车辆
     newVehicle(data){
         let param={
