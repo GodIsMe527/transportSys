@@ -454,9 +454,9 @@
                 let cargoD = this.$refs.filterHead.getCargoD();
                 startP ? param.startP = startP : "";
                 endP ? param.endP = endP : "";
-                driverP ? param.driverP = driverP : "";
                 startDP ? param.startDP = new Date(startDP).getTime() / 1000 : "";
                 endDP ? param.endDP = new Date(endDP).getTime() / 1000 : "";
+                driverP ? param.driverP = driverP : "";
                 vehicleD ? param.vehicleD = vehicleD : "";
                 cargoD ? param.cargoD = cargoD : "";
                 return new Promise((resolve, reject) => {

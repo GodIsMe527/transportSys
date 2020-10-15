@@ -5,7 +5,7 @@
                 <span class="title">开始日期: </span>
                 <el-date-picker
                         v-model="startD"
-                        type="date"
+                        type="datetime"
                         placeholder="开始日期">
                 </el-date-picker>
             </div>
@@ -13,7 +13,7 @@
                 <span class="title">结束日期: </span>
                 <el-date-picker
                         v-model="endD"
-                        type="date"
+                        type="datetime"
                         placeholder="结束日期">
                 </el-date-picker>
             </div>
@@ -68,6 +68,7 @@
 
 <script>
     import api from '../../utils/api'
+
     export default {
         name: "filterHead",
         props: {
@@ -85,14 +86,14 @@
                 drivers: [],
                 points: [],
                 cargoes: [],
-                vehicles:[],
+                vehicles: [],
                 start: "",   //起始地点
                 end: "",     //结束地点
                 driverD: "",
                 startD: "",
                 endD: "",    //起始日期
-                cargoD:"",   //货物
-                vehicleD:"",   //车辆
+                cargoD: "",   //货物
+                vehicleD: "",   //车辆
             }
         },
         methods: {
@@ -118,21 +119,22 @@
                 return this.cargoD;
             },
             //提交
-            commit(){
+            commit() {
                 console.log("提交");
                 this.$emit("queryCommit");
             },
             //获取所有货物列表
             getCargoList() {
                 let param = {
-                    currentPage:1,          //当前页数
+                    currentPage: 1,          //当前页数
                     pageSize: 9999,       //页容量
                     status: 1
                 };
                 return new Promise((resolve, reject) => {
                     api.getCargoList(param).then(res => {
                         if (res.data.code == 0) {
-                            this.cargoes = res.data.data;
+                            // this.cargoes = res.data.data;
+                            this.cargoes = this.points = this.vehicles = [{id: "", name:"请选择货物"}].concat(res.data.data);
                             resolve()
                         } else {
                             reject();
@@ -150,7 +152,8 @@
                 return new Promise((resolve, reject) => {
                     api.getStartPointList(param).then(res => {
                         if (res.data.code == 0) {
-                            this.points = res.data.data;
+                            // this.points = res.data.data;
+                            this.points = this.vehicles = [{id: "", name:"请选择地点"}].concat(res.data.data);
                             resolve()
                         } else {
                             reject();
@@ -168,7 +171,7 @@
                 return new Promise((resolve, reject) => {
                     api.getVehicleList(param).then(res => {
                         if (res.data.code == 0) {
-                            this.vehicles = res.data.data;
+                            this.vehicles = [{id: "", no: "请选择车辆"}].concat(res.data.data);
                             resolve()
                         } else {
                             reject();
@@ -186,7 +189,7 @@
                 return new Promise((resolve, reject) => {
                     api.getUserList(param).then(res => {
                         if (res.data.code == 0) {
-                            this.drivers = res.data.data;
+                            this.drivers = [{id: "", userName: "请选择司机"}].concat(res.data.data);
                             resolve();
                         } else {
                             reject();
@@ -195,7 +198,7 @@
                 });
             },
         },
-        mounted(){
+        mounted() {
             this.getCargoList();
             this.getAddressList();
             this.getVehicleList();
