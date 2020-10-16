@@ -280,34 +280,42 @@ module.exports = (app) => {
         let vehicleD = req.query.vehicleD;
         let cargoD = req.query.cargoD;
         if (startP) {
+            sqlPlus?( sqlPlus += " and startAddress=?"):( sqlPlus = " startAddress=?");
             sqlPlus += " and startAddress=?";
             paramArray.push(startP);
         }
         if (endP) {
-            sqlPlus += " and endAddress=?";
+            sqlPlus?( sqlPlus += " and endAddress=?"):( sqlPlus = " endAddress=?");
+            // sqlPlus += " and endAddress=?";
             paramArray.push(endP);
         }
         if (startDP) {
-            sqlPlus += " and createTime>=?";
+            sqlPlus?( sqlPlus += " and createTime>=?"):( sqlPlus = " createTime>=?");
+            // sqlPlus += " and createTime>=?";
             paramArray.push(startDP);
         }
         if (endDP) {
-            sqlPlus += " and createTime<=?";
+            sqlPlus?( sqlPlus += " and createTime<=?"):( sqlPlus = " createTime<=?");
+            // sqlPlus += " and createTime<=?";
             paramArray.push(endDP);
         }
         if (driverP) {
-            sqlPlus += " and driver=?";
+            sqlPlus?( sqlPlus += " and driver=?"):( sqlPlus = " driver=?");
+            // sqlPlus += " and driver=?";
             paramArray.push(driverP);
         }
         if (vehicleD) {
-            sqlPlus += " and vehicle=?";
+            sqlPlus?( sqlPlus += " and vehicle=?"):( sqlPlus = " vehicle=?");
+            // sqlPlus += " and vehicle=?";
             paramArray.push(vehicleD);
         }
         if (cargoD) {
-            sqlPlus += " and cargo=?";
+            sqlPlus?( sqlPlus += " and cargo=?"):( sqlPlus = " cargo=?");
+            // sqlPlus += " and cargo=?";
             paramArray.push(cargoD);
         }
-        sqlPlus ? (" where" + sqlPlus) : "";
+        sqlPlus? sqlPlus=(" where" + sqlPlus) : "";
+        console.log(sqlPlus);
         sql = ` SELECT DATE_FORMAT( createTime, "%Y-%m-%d" ) AS time,SUM(totalPrice) AS totalPrice FROM record ${sqlPlus} GROUP BY DATE_FORMAT( createTime, "%Y-%m-%d")`;
         // sql = "select * from record where status=1" + sqlPlus + " limit ?,?";
         result = await db.row(sql, paramArray);

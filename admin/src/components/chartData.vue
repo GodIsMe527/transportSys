@@ -76,14 +76,16 @@
                 let startP = this.$refs.filterHead.getStart();
                 let endP = this.$refs.filterHead.getEnd();
                 let driverP = this.$refs.filterHead.getDriverD();
-                let startDP = this.$refs.filterHead.getStartD();
-                let endDP = this.$refs.filterHead.getEndD();
+                // let startDP = this.$refs.filterHead.getStartD();
+                let startDP = this.startDateStr;
+                // let endDP = this.$refs.filterHead.getEndD();
+                let endDP = this.endDateStr;
                 let vehicleD = this.$refs.filterHead.getVehicleD();
                 let cargoD = this.$refs.filterHead.getCargoD();
                 startP ? param.startP = startP : "";
                 endP ? param.endP = endP : "";
-                startDP ? param.startDP = new Date(startDP).getTime() / 1000 : "";
-                endDP ? param.endDP = new Date(endDP).getTime() / 1000 : "";
+                startDP ? param.startDP = startDP : "";
+                endDP ? param.endDP = endDP : "";
                 driverP ? param.driverP = driverP : "";
                 vehicleD ? param.vehicleD = vehicleD : "";
                 cargoD ? param.cargoD = cargoD : "";
@@ -105,9 +107,10 @@
         },
         created() {
             let today = new Date();
-            let tenDay = new Date((today.getTime() + 60 * 60 * 24 * 10 * 1000));
-            this.startDateStr = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
-            this.endDateStr = tenDay.getFullYear() + "-" + (tenDay.getMonth() + 1) + "-" + tenDay.getDate();
+            let beforeDay = new Date((today.getTime() - 60 * 60 * 24 * 10 * 1000));
+            this.endDateStr = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+            this.startDateStr  = beforeDay.getFullYear() + "-" + (beforeDay.getMonth() + 1) + "-" + beforeDay.getDate();
+            console.log(this.startDateStr+"***"+this.endDateStr);
         },
         mounted() {
             this.myChart = this.$echarts.init(this.$refs.chartPart);
