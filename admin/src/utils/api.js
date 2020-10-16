@@ -103,6 +103,15 @@ const api= {
         };
         return requestAll.request(param);
     },
+    //修改记录价格
+    updatePrice(data){
+        let param={
+            url:"/updatePrice",
+            method:"post",
+            data:data
+        };
+        return requestAll.request(param);
+    },
     //添加车辆
     newVehicle(data){
         let param={
@@ -116,6 +125,15 @@ const api= {
     getVehicleList(data){
         let param={
             url:"/getVehicleList",
+            method:"get",
+            data:data
+        };
+        return requestAll.requestGet(param);
+    },
+    //获取收益
+    queryChartData(data){
+        let param={
+            url:"/queryChartData",
             method:"get",
             data:data
         };

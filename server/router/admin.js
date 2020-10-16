@@ -265,6 +265,60 @@ module.exports = (app) => {
         res.send(data)
     });
     /**
+     * 获取收益记录
+     */
+    router.get("/queryChartData", async (req, res) => {
+        let status = req.query.status;
+        let data = {}, sqlPlus = "", paramArray = [], sql, result, num;
+        let currentPage = parseInt(req.query.currentPage);
+        let pageSize = parseInt(req.query.pageSize);
+        let startP = req.query.startP;
+        let endP = req.query.endP;
+        let startDP = req.query.startDP;
+        let endDP = req.query.endDP;
+        let driverP = req.query.driverP;
+        let vehicleD = req.query.vehicleD;
+        let cargoD = req.query.cargoD;
+        if (startP) {
+            sqlPlus += " and startAddress=?";
+            paramArray.push(startP);
+        }
+        if (endP) {
+            sqlPlus += " and endAddress=?";
+            paramArray.push(endP);
+        }
+        if (startDP) {
+            sqlPlus += " and createTime>=?";
+            paramArray.push(startDP);
+        }
+        if (endDP) {
+            sqlPlus += " and createTime<=?";
+            paramArray.push(endDP);
+        }
+        if (driverP) {
+            sqlPlus += " and driver=?";
+            paramArray.push(driverP);
+        }
+        if (vehicleD) {
+            sqlPlus += " and vehicle=?";
+            paramArray.push(vehicleD);
+        }
+        if (cargoD) {
+            sqlPlus += " and cargo=?";
+            paramArray.push(cargoD);
+        }
+        sqlPlus ? (" where" + sqlPlus) : "";
+        sql = ` SELECT DATE_FORMAT( createTime, "%Y-%m-%d" ) AS time,SUM(totalPrice) AS totalPrice FROM record ${sqlPlus} GROUP BY DATE_FORMAT( createTime, "%Y-%m-%d")`;
+        // sql = "select * from record where status=1" + sqlPlus + " limit ?,?";
+        result = await db.row(sql, paramArray);
+        // sql = "select count(*) from record where status=?" + sqlPlus;
+        // num = await db.row(sql, [parseInt(status)].concat(paramArray));
+        data.data = result;
+        // data.total = num[0]["count(*)"];
+        data.code = 0;
+        res.send(data)
+    });
+    /**
      * 修改用户状态
      */
     router.post("/delUser", async (req, res) => {
@@ -344,6 +398,19 @@ module.exports = (app) => {
         }
     });
     /**
+     * 修改记录价格
+     */
+    router.post("/updatePrice", async (req, res) => {
+        let sql = "update record set price=? where id=?";
+        let data = {};
+        let r = await db.row(sql, [req.body["price"], req.body["id"]]);
+        if (r && r.affectedRows) {
+            data.code = 0;
+            data.message = "修改成功";
+            res.send(data);
+        }
+    });
+    /**
      * 修改地点状态
      */
     router.post("/deletePoint", async (req, res) => {
@@ -400,18 +467,23 @@ module.exports = (app) => {
      */
     router.post("/newRecord", async (req, res) => {
         let downFee = req.body["downFee"], roadFee = req.body["roadFee"], data = {}, sql = "", r = [];
+        let price = util.toDecimal2(parseFloat(req.body["price"]) * parseFloat(req.body["num"]), 2) - req.body["downFee"] - req.body["roadFee"];
+        console.log(parseFloat(req.body["price"]) * parseFloat(req.body["num"]));
+        console.log(util.toDecimal2(parseFloat(req.body["price"]) * parseFloat(req.body["num"]), 2));
+        console.log(util.toDecimal2(parseFloat(req.body["price"]) * parseFloat(req.body["num"]), 2) - req.body["downFee"]);
+        console.log(util.toDecimal2(parseFloat(req.body["price"]) * parseFloat(req.body["num"]), 2) - req.body["downFee"] - req.body["roadFee"]);
         if (downFee && roadFee) {
-            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,downFee,roadFee,vehicle) values(?,?,?,?,?,?,now(),?,?,?)";
-            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"], req.body["driver"], req.body["downFee"], req.body["roadFee"], req.body["vehicle"]]);
+            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,downFee,roadFee,vehicle,totalPrice) values(?,?,?,?,?,?,now(),?,?,?,?)";
+            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"], req.body["driver"], req.body["downFee"], req.body["roadFee"], req.body["vehicle"], price]);
         } else if (downFee) {
-            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,downFee,vehicle) values(?,?,?,?,?,?,now(),?,?)";
-            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"], req.body["driver"], req.body["downFee"], req.body["vehicle"]]);
+            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,downFee,vehicle,totalPrice) values(?,?,?,?,?,?,now(),?,?,?)";
+            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"], req.body["driver"], req.body["downFee"], req.body["vehicle"], price]);
         } else if (roadFee) {
-            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,roadFee,vehicle) values(?,?,?,?,?,?,now(),?,?)";
-            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"], req.body["driver"], req.body["roadFee"], req.body["vehicle"]]);
+            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,roadFee,vehicle,totalPrice) values(?,?,?,?,?,?,now(),?,?,?)";
+            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"], req.body["driver"], req.body["roadFee"], req.body["vehicle"], price]);
         } else {
-            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,vehicle) values(?,?,?,?,?,?,now(),?)";
-            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"], req.body["driver"], req.body["vehicle"]]);
+            sql = "insert into record(cargo,weight,price,startAddress,endAddress,driver,createTime,vehicle,totalPrice) values(?,?,?,?,?,?,now(),?,?)";
+            r = await db.row(sql, [req.body["cargo"], req.body["num"], req.body["price"], req.body["startAddress"], req.body["endAddress"], req.body["driver"], req.body["vehicle"], price]);
         }
         if (r && r.affectedRows) {
             data.code = 0;

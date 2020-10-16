@@ -93,7 +93,7 @@
                     width="180">
                 <template slot-scope="scope">
                     <input type="tel" class="priceInput" v-model="inputPriceList[scope.row.priceModel]"
-                           oninput="value=value.replace(/^\.+|[^\d.]/g,'')">
+                           oninput="value=value.replace(/^\.+|[^\d.]/g,'')" @change="updatePrice(scope.row)"/>
                 </template>
             </el-table-column>
             <el-table-column
@@ -538,7 +538,8 @@
                     this.$message.error("司机不能为空");
                     return false;
                 }
-                if (this.layerTitle == "新增货物") {
+                console.log(this.form);
+                if (this.layerTitle == "新增记录") {
                     api.newRecord(this.form).then(res => {
                         if (res.data.code == 0) {
                             this.$message({
@@ -546,7 +547,7 @@
                                 type: 'success'
                             });
                             this.clearUserDate();
-                            this.getUserList()
+                            this.getRecordList();
                         }
                     })
                 } else {
@@ -581,8 +582,6 @@
             },
             //删除记录
             delRecord(item) {
-                console.log(item);
-                console.log(this.recordListObj);
                 this.operateObj = item;
                 let data = {
                     id: this.operateObj.id,
@@ -614,6 +613,29 @@
             //查询按钮
             queryCommit() {
                 this.getRecordList();
+            },
+            //更新记录价格
+            updatePrice(item) {
+                console.log(item);
+                console.log(this.inputPriceList[item.priceModel]);
+                if (!item) {
+                    return;
+                }
+                let data = {
+                    id: item.id,
+                    price: this.inputPriceList[item.priceModel]
+                };
+                api.updatePrice(data).then(res => {
+                    if (res.data.code == 0) {
+                        // this.updatePrice();
+                        // this.$message({
+                        //     message: '修改成功',
+                        //     type: 'success'
+                        // });
+                    } else {
+                        this.$message.error(data.message || "登陆失败");
+                    }
+                })
             }
         }
     }
@@ -645,6 +667,9 @@
         .priceInput {
             width: 60%;
             border: 1px solid #ececec;
+            line-height: 20px;
+            height: 22px;
+            padding-left: 5px;
         }
         .priceInput:focus {
             border: 1px solid #409EFF !important;

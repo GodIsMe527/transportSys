@@ -2,14 +2,14 @@
     <div>
         <p @click="change">点我开始变</p>
         <p @click="getValue">点我获取值</p>
-        <filter-head ref="filterHead"></filter-head>
+        <filter-head ref="filterHead" dateType="date" @queryCommit="queryCommit"></filter-head>
         <div ref="chartPart" style="width: 100%;height: 500px"></div>
     </div>
 </template>
 
 <script>
     import filterHead from "./common/filterHead.vue"
-
+    import api from '../utils/api'
     export default {
         name: "chartData",
         components: {
@@ -38,6 +38,8 @@
                 driverD: "",
                 startD: "",
                 endD: "",
+                startDateStr: "",
+                endDateStr: "",
             }
         },
         methods: {
@@ -61,6 +63,51 @@
             getValue() {
                 console.log(this.$refs.filterHead.getStart());
             },
+            //查询数据
+            queryChartData(){
+                // SELECT
+                // DATE_FORMAT( createTime, "%Y-%m-%d" ) AS time,
+                //     SUM(totalPrice) AS total
+                // FROM record WHERE createTime>='2020-10-13' AND createTime<='2020-10-16'
+                // GROUP BY DATE_FORMAT( createTime, "%Y-%m-%d")
+                let param = {
+                    status: 1
+                };
+                let startP = this.$refs.filterHead.getStart();
+                let endP = this.$refs.filterHead.getEnd();
+                let driverP = this.$refs.filterHead.getDriverD();
+                let startDP = this.$refs.filterHead.getStartD();
+                let endDP = this.$refs.filterHead.getEndD();
+                let vehicleD = this.$refs.filterHead.getVehicleD();
+                let cargoD = this.$refs.filterHead.getCargoD();
+                startP ? param.startP = startP : "";
+                endP ? param.endP = endP : "";
+                startDP ? param.startDP = new Date(startDP).getTime() / 1000 : "";
+                endDP ? param.endDP = new Date(endDP).getTime() / 1000 : "";
+                driverP ? param.driverP = driverP : "";
+                vehicleD ? param.vehicleD = vehicleD : "";
+                cargoD ? param.cargoD = cargoD : "";
+                console.log(param);
+                return new Promise((resolve, reject) => {
+                    api.queryChartData(param).then(res => {
+                        if (res.data.code == 0) {
+                            console.log(res.data.data);
+                            resolve();
+                        } else {
+                            reject();
+                        }
+                    })
+                });
+            },
+            queryCommit(){
+                this.queryChartData();
+            },
+        },
+        created() {
+            let today = new Date();
+            let tenDay = new Date((today.getTime() + 60 * 60 * 24 * 10 * 1000));
+            this.startDateStr = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+            this.endDateStr = tenDay.getFullYear() + "-" + (tenDay.getMonth() + 1) + "-" + tenDay.getDate();
         },
         mounted() {
             this.myChart = this.$echarts.init(this.$refs.chartPart);
@@ -101,6 +148,7 @@
             window.addEventListener('resize', () => {
                 this.myChart.resize();
             });
+            this.queryChartData();
         }
     }
 </script>

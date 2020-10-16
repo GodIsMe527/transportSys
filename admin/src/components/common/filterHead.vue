@@ -5,7 +5,7 @@
                 <span class="title">开始日期: </span>
                 <el-date-picker
                         v-model="startD"
-                        type="datetime"
+                        :type="dateType"
                         placeholder="开始日期">
                 </el-date-picker>
             </div>
@@ -13,7 +13,7 @@
                 <span class="title">结束日期: </span>
                 <el-date-picker
                         v-model="endD"
-                        type="datetime"
+                        :type="dateType"
                         placeholder="结束日期">
                 </el-date-picker>
             </div>
@@ -48,7 +48,7 @@
             </el-select>
             <el-select v-model="start" filterable placeholder="选择起点" class="block">
                 <el-option
-                        v-for="item in points"
+                        v-for="item in startPoints"
                         :key="item.id"
                         :label="item.name"
                         :value="item.id">
@@ -56,7 +56,7 @@
             </el-select>
             <el-select v-model="end" filterable placeholder="选择终点" class="block">
                 <el-option
-                        v-for="item in points"
+                        v-for="item in endPoints"
                         :key="item.id"
                         :label="item.name"
                         :value="item.id">
@@ -79,12 +79,18 @@
             showSecondCondition: {
                 type: Boolean,
                 default: true
+            },
+            dateType:{
+                type: String,
+                default: "datetime"
             }
         },
         data() {
             return {
                 drivers: [],
                 points: [],
+                startPoints:[],
+                endPoints:[],
                 cargoes: [],
                 vehicles: [],
                 start: "",   //起始地点
@@ -153,7 +159,17 @@
                     api.getStartPointList(param).then(res => {
                         if (res.data.code == 0) {
                             // this.points = res.data.data;
-                            this.points = this.vehicles = [{id: "", name:"请选择地点"}].concat(res.data.data);
+                            // this.points = [{id: "", name:"请选择地点"}].concat(res.data.data);
+                            res.data.data.map(item=>{
+                                if(item.type == 1 || item.type == 0){
+                                    this.startPoints.push(item);
+                                }
+                                if(item.type == 2 || item.type == 0){
+                                    this.endPoints.push(item);
+                                }
+                            });
+                            this.startPoints = [{id: "", name:"请选择起点"}].concat(this.startPoints);
+                            this.endPoints = [{id: "", name:"请选择起点"}].concat(this.endPoints);
                             resolve()
                         } else {
                             reject();
@@ -184,7 +200,8 @@
                 let param = {
                     currentPage: 1,          //当前页数
                     pageSize: 99999,       //页容量
-                    type: 1
+                    type: 1,
+                    status:1
                 };
                 return new Promise((resolve, reject) => {
                     api.getUserList(param).then(res => {
