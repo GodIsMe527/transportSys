@@ -5,7 +5,8 @@ let pool = mysql.createPool({
     user: 'root',
     password: '123456',
     database: 'transportsys',
-    multipleStatements: true //是否允许执行多条sql语句
+    multipleStatements: true, //是否允许执行多条sql语句
+    timezone: "08:00"
 });
 //将结果已对象数组返回
 let row = (sql, params) => {

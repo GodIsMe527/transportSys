@@ -2,7 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import './plugins/element.js'
 import router from './router'
-import http from "./utils/utils"
+import http from "./utils/http"
 import md5 from 'js-md5';
 import echarts from 'echarts'
 

@@ -3,7 +3,7 @@
         <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
             <el-menu router :default-openeds="['1','2']">
                 <el-submenu index="1">
-                    <template slot="title"><i class="el-icon-message"></i>数据查看</template>
+                    <template slot="title"><i class="el-icon-s-data"></i>数据查看</template>
                     <el-menu-item-group>
                         <el-menu-item index="/dataReport">数据报表统计</el-menu-item>
                         <el-menu-item index="/chartData">收益图形报表</el-menu-item>
@@ -22,15 +22,8 @@
         </el-aside>
         <el-container>
             <el-header style="text-align: right; font-size: 12px">
-                <el-dropdown>
-                    <i class="el-icon-setting" style="margin-right: 15px"></i>
-                    <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item>查看</el-dropdown-item>
-                        <el-dropdown-item>新增</el-dropdown-item>
-                        <el-dropdown-item>删除</el-dropdown-item>
-                    </el-dropdown-menu>
-                </el-dropdown>
-                <span>王小虎</span>
+                <span class="name">{{userName}}</span>
+                <i class="el-icon-switch-button" style="margin-right: 15px" @click="quit"></i>
             </el-header>
             <el-main>
                 <router-view></router-view>
@@ -49,7 +42,17 @@
                 address: '上海市普陀区金沙江路 1518 弄'
             };
             return {
-                tableData: Array(20).fill(item)
+                tableData: Array(20).fill(item),
+                userName: localStorage.getItem("name"),
+            }
+        },
+        methods: {
+            quit() {
+                // /login
+                this.$router.push("/login");
+                localStorage.setItem("name", "");
+                localStorage.setItem("pwd","");
+                localStorage.setItem("token", "");
             }
         }
     }
@@ -65,7 +68,12 @@
     .el-aside {
         color: #333;
     }
-    .el-menu{
+
+    .el-menu {
         height: 100%;
+    }
+
+    .name {
+        margin-right: 10px;
     }
 </style>

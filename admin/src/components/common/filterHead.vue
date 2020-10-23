@@ -124,6 +124,12 @@
             getCargoD() {
                 return this.cargoD;
             },
+            setStartD(param) {
+                this.startD=param;
+            },
+            setEndD(param) {
+                this.endD=param;
+            },
             //提交
             commit() {
                 console.log("提交");
@@ -232,6 +238,9 @@
         .block {
             margin-right: 15px;
             font-size: 14px;
+            span{
+                margin-right: 10px;
+            }
         }
     }
 

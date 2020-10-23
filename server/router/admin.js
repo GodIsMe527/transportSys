@@ -10,10 +10,17 @@ module.exports = (app) => {
     router.post("/login", async (req, res) => {
         let sql = "select * from user where userName=?";
         let data = {}, name = req.body["name"], pwd = req.body["pwd"];
+        console.log(pwd);
         let r = await db.row(sql, [name]);
         if (r && r.length > 0) {
             r = r[0];
             if (r.pwd === pwd) {
+                if (r.type != 3) {
+                    data.code = -96;
+                    data.message = "权限不足";
+                    res.send(data);
+                    return;
+                }
                 let randomStr = util.randomString(24) + "WLT" + new Date().getTime()
                 let token = md5(randomStr);           //登陆后生成token   随机字符串+固定字符串+时间戳
                 sql = "insert into loginrecord(userName,token,createTime) values(?,?,?)";
@@ -268,10 +275,8 @@ module.exports = (app) => {
      * 获取收益记录
      */
     router.get("/queryChartData", async (req, res) => {
-        let status = req.query.status;
-        let data = {}, sqlPlus = "", paramArray = [], sql, result, num;
-        let currentPage = parseInt(req.query.currentPage);
-        let pageSize = parseInt(req.query.pageSize);
+        let data = {}, sqlPlus = "", sqlPlusTime = "", paramArray = [], paramArrayTime = [], sql, result, sqlDate = "",
+            sqlParam = "time";
         let startP = req.query.startP;
         let endP = req.query.endP;
         let startDP = req.query.startDP;
@@ -279,50 +284,90 @@ module.exports = (app) => {
         let driverP = req.query.driverP;
         let vehicleD = req.query.vehicleD;
         let cargoD = req.query.cargoD;
+        let dateType = req.query.dateType;
         if (startP) {
-            sqlPlus?( sqlPlus += " and startAddress=?"):( sqlPlus = " startAddress=?");
-            sqlPlus += " and startAddress=?";
+            sqlPlus ? (sqlPlus += " and startAddress=?") : (sqlPlus = " startAddress=?");
             paramArray.push(startP);
         }
         if (endP) {
-            sqlPlus?( sqlPlus += " and endAddress=?"):( sqlPlus = " endAddress=?");
-            // sqlPlus += " and endAddress=?";
+            sqlPlus ? (sqlPlus += " and endAddress=?") : (sqlPlus = " endAddress=?");
             paramArray.push(endP);
         }
         if (startDP) {
-            sqlPlus?( sqlPlus += " and createTime>=?"):( sqlPlus = " createTime>=?");
-            // sqlPlus += " and createTime>=?";
-            paramArray.push(startDP);
+            console.log("dateType=" + dateType);
+            if (dateType == 0) {
+                sqlPlus ? (sqlPlus += " and createTime>=?") : (sqlPlus = " createTime>=?");
+                sqlPlusTime ? (sqlPlusTime += " and a.datelist>=?") : (sqlPlusTime = " a.datelist>=?");
+                paramArray.push(startDP);
+                paramArrayTime.push(startDP);
+                sqlDate = `( createTime, "%Y-%m" )`;
+                sqlParam = "time"
+            } else if (dateType == 1) {
+                sqlPlus ? (sqlPlus += " and createTime>=?") : (sqlPlus = " createTime>=?");
+                sqlPlusTime ? (sqlPlusTime += " and a.datelist>=?") : (sqlPlusTime = " a.datelist>=?");
+                paramArray.push(startDP + "-01");
+                paramArrayTime.push(parseInt(startDP.split("-")[0]) * 12 + parseInt(startDP.split("-")[1]) - 2000 * 12);
+                sqlDate = `( createTime, "%Y-%m" )`;
+                sqlParam = "monthNum"
+            } else if (dateType == 2) {
+
+            }
         }
         if (endDP) {
-            sqlPlus?( sqlPlus += " and createTime<=?"):( sqlPlus = " createTime<=?");
-            // sqlPlus += " and createTime<=?";
-            paramArray.push(endDP);
+            if (dateType == 0) {
+                sqlPlus ? (sqlPlus += " and createTime<=?") : (sqlPlus = " createTime<=?");
+                sqlPlusTime ? (sqlPlusTime += " and a.datelist<=?") : (sqlPlusTime = " a.datelist<=?");
+                paramArray.push(endDP);
+                paramArrayTime.push(endDP);
+            } else if (dateType == 1) {
+                let temp = [], finalDP = "";
+                sqlPlus ? (sqlPlus += " and createTime<?") : (sqlPlus = " createTime<?");
+                sqlPlusTime ? (sqlPlusTime += " and a.datelist<=?") : (sqlPlusTime = " a.datelist<=?");
+                temp = endDP.split("-");
+                if (temp[1] == 12) {
+                    finalDP = (parseInt(endDP.split("-")[0]) + 1) + "-01-01";
+                } else {
+                    finalDP = endDP.split("-")[0] + "-" + (parseInt(endDP.split("-")[1]) + 1) + "-01";
+                }
+                paramArray.push(finalDP);
+                paramArrayTime.push(parseInt(endDP.split("-")[0]) * 12 + parseInt(endDP.split("-")[1]) - 2000 * 12);
+            } else if (dateType == 2) {
+                sqlPlus ? (sqlPlus += " and createTime<?") : (sqlPlus = " createTime<?");
+                sqlPlusTime ? (sqlPlusTime += " and a.datelist<=?") : (sqlPlusTime = " a.datelist<=?");
+                paramArray.push(endDP + "-01-01");
+                paramArrayTime.push(endDP);
+            }
         }
         if (driverP) {
-            sqlPlus?( sqlPlus += " and driver=?"):( sqlPlus = " driver=?");
-            // sqlPlus += " and driver=?";
+            sqlPlus ? (sqlPlus += " and driver=?") : (sqlPlus = " driver=?");
             paramArray.push(driverP);
         }
         if (vehicleD) {
-            sqlPlus?( sqlPlus += " and vehicle=?"):( sqlPlus = " vehicle=?");
-            // sqlPlus += " and vehicle=?";
+            sqlPlus ? (sqlPlus += " and vehicle=?") : (sqlPlus = " vehicle=?");
             paramArray.push(vehicleD);
         }
         if (cargoD) {
-            sqlPlus?( sqlPlus += " and cargo=?"):( sqlPlus = " cargo=?");
-            // sqlPlus += " and cargo=?";
+            sqlPlus ? (sqlPlus += " and cargo=?") : (sqlPlus = " cargo=?");
             paramArray.push(cargoD);
         }
-        sqlPlus? sqlPlus=(" where" + sqlPlus) : "";
-        console.log(sqlPlus);
-        sql = ` SELECT DATE_FORMAT( createTime, "%Y-%m-%d" ) AS time,SUM(totalPrice) AS totalPrice FROM record ${sqlPlus} GROUP BY DATE_FORMAT( createTime, "%Y-%m-%d")`;
-        // sql = "select * from record where status=1" + sqlPlus + " limit ?,?";
+        sqlPlus ? sqlPlus = (" where" + sqlPlus) : "";
+        sqlPlusTime ? sqlPlusTime = (" where" + sqlPlusTime) : "";
+        paramArray = paramArray.concat(paramArrayTime);
+        console.log(paramArray);
+        if (dateType == 0) {
+            sql = `SELECT a.datelist date,ifnull(b.totalPrice,0) num FROM calendar a LEFT join (SELECT DATE_FORMAT( createTime, "%Y-%m-%d" ) AS time,SUM(totalPrice) AS totalPrice FROM record ${sqlPlus} GROUP BY DATE_FORMAT( createTime, "%Y-%m-%d" )) b on a.datelist=b.time ${sqlPlusTime} ORDER BY a.datelist`;
+        } else if (dateType == 1) {
+            sql = `SELECT a.datelist date,ifnull(b.totalPrice,0) num FROM monyea a LEFT join (SELECT monthNum AS time,SUM(totalPrice) AS totalPrice FROM record ${sqlPlus} GROUP BY monthNum) b on a.datelist=b.time ${sqlPlusTime} ORDER BY a.datelist`;
+        } else if (dateType == 0) {
+
+        }
+        // sql = `SELECT a.datelist date,ifnull(b.totalPrice,0) num FROM calendar a LEFT join (SELECT DATE_FORMAT${sqlDate} AS time,SUM(totalPrice) AS totalPrice FROM record ${sqlPlus} GROUP BY DATE_FORMAT${sqlDate}) b on a.datelist=b.${sqlParam} ${sqlPlusTime} ORDER BY a.datelist`;
         result = await db.row(sql, paramArray);
-        // sql = "select count(*) from record where status=?" + sqlPlus;
-        // num = await db.row(sql, [parseInt(status)].concat(paramArray));
+        result.map(item => {
+            let tempDate=parseInt(item.date)
+            item.date = (parseInt(tempDate / 12)+2000) + "-"+(tempDate % 12).toString().padStart(2,"0");
+        });
         data.data = result;
-        // data.total = num[0]["count(*)"];
         data.code = 0;
         res.send(data)
     });
